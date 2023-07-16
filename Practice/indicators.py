@@ -4,9 +4,9 @@ import talib
 import mplfinance as mplf
 
 
-def bollinger_plot(candles: pandas.DataFrame) -> pandas.DataFrame:
+def set_style() -> (dict, dict):
     mc = mplf.make_marketcolors(up='g', down='r', inherit=True)
-    style_dist = {"xtick.color": '#808097',
+    style_dict = {"xtick.color": '#808097',
                   "ytick.color": '#808097',
                   "xtick.labelcolor": '#808097',
                   "ytick.labelcolor": '#808097',
@@ -16,15 +16,20 @@ def bollinger_plot(candles: pandas.DataFrame) -> pandas.DataFrame:
                   'scatter.edgecolors': '#000000',
                   'axes.edgecolor': '#000000'}
 
+    s = mplf.make_mpf_style(marketcolors=mc, figcolor='#1C1C23', facecolor='#1C1C23', edgecolor='#808097',
+                            rc=style_dist, gridcolor='#3A3A48', gridstyle="--")
+    return s, style_dict
+
+
+def bollinger_plot(candles: pandas.DataFrame) -> pandas.DataFrame:
+    s, style_dict = set_style()
+
     candles['upper_bollinger'], candles['middle_bollinger'], candles['lower_bollinger'] = \
         talib.BBANDS(candles['close'], 30, 2.84, 2.84)
 
     bollinger_addplot = [mplf.make_addplot(candles['upper_bollinger'], color='r', markersize=1, width=1),
                          mplf.make_addplot(candles['middle_bollinger'], color='b', markersize=1, width=1),
                          mplf.make_addplot(candles['lower_bollinger'], color='g', markersize=1, width=1)]
-
-    s = mplf.make_mpf_style(marketcolors=mc, figcolor='#1C1C23', facecolor='#1C1C23', edgecolor='#808097',
-                            rc=style_dist, gridcolor='#3A3A48', gridstyle="--")
 
     candles.index = pandas.DatetimeIndex(candles['time'])
     candles = candles.iloc[2:, 1:8]
@@ -38,25 +43,13 @@ def bollinger_plot(candles: pandas.DataFrame) -> pandas.DataFrame:
 
 
 def ema_plot(candles: pandas.DataFrame) -> pandas.DataFrame:
-    mc = mplf.make_marketcolors(up='g', down='r', inherit=True)
-    style_dist = {"xtick.color": '#808097',
-                  "ytick.color": '#808097',
-                  "xtick.labelcolor": '#808097',
-                  "ytick.labelcolor": '#808097',
-                  "axes.spines.top": False,
-                  "axes.spines.right": False,
-                  "axes.labelcolor": '#808097',
-                  'scatter.edgecolors': '#000000',
-                  'axes.edgecolor': '#000000'}
+    s, style_dict = set_style()
 
     candles['short_ema'] = talib.EMA(candles['close'], timeperiod=30)
     candles['long_ema'] = talib.EMA(candles['close'], timeperiod=70)
 
     ema_addplot = [mplf.make_addplot(candles['short_ema'], color='y', markersize=1, width=1),
                    mplf.make_addplot(candles['long_ema'], color='b', markersize=1, width=1)]
-
-    s = mplf.make_mpf_style(marketcolors=mc, figcolor='#1C1C23', facecolor='#1C1C23', edgecolor='#808097',
-                            rc=style_dist, gridcolor='#3A3A48', gridstyle="--")
 
     candles.index = pandas.DatetimeIndex(candles['time'])
     try:
@@ -69,16 +62,7 @@ def ema_plot(candles: pandas.DataFrame) -> pandas.DataFrame:
 
 
 def macd(candles: pandas.DataFrame) -> pandas.DataFrame:
-    mc = mplf.make_marketcolors(up='g', down='r', inherit=True)
-    style_dist = {"xtick.color": '#808097',
-                  "ytick.color": '#808097',
-                  "xtick.labelcolor": '#808097',
-                  "ytick.labelcolor": '#808097',
-                  "axes.spines.top": False,
-                  "axes.spines.right": False,
-                  "axes.labelcolor": '#808097',
-                  'scatter.edgecolors': '#000000',
-                  'axes.edgecolor': '#000000'}
+    s, style_dict = set_style()
 
     candles['MACD'], candles['MACDSignal'], candles['MACDhist'] = talib.MACD(candles['close'], fastperiod=12,
                                                                              slowperiod=26,
@@ -87,9 +71,6 @@ def macd(candles: pandas.DataFrame) -> pandas.DataFrame:
     macd_addplot = [mplf.make_addplot(candles['MACD'], color='w', markersize=1, panel=2, width=1),
                     mplf.make_addplot(candles['MACDSignal'], color='b', markersize=1, panel=2, width=1),
                     mplf.make_addplot(candles['MACDhist'], color='r', markersize=1, panel=2, width=1)]
-
-    s = mplf.make_mpf_style(marketcolors=mc, figcolor='#1C1C23', facecolor='#1C1C23', edgecolor='#808097',
-                            rc=style_dist, gridcolor='#3A3A48', gridstyle="--")
 
     candles.index = pandas.DatetimeIndex(candles['time'])
     try:
@@ -102,16 +83,7 @@ def macd(candles: pandas.DataFrame) -> pandas.DataFrame:
 
 
 def zigzag(candles: pandas.DataFrame) -> pandas.DataFrame:
-    mc = mplf.make_marketcolors(up='g', down='r', inherit=True)
-    style_dist = {"xtick.color": '#808097',
-                  "ytick.color": '#808097',
-                  "xtick.labelcolor": '#808097',
-                  "ytick.labelcolor": '#808097',
-                  "axes.spines.top": False,
-                  "axes.spines.right": False,
-                  "axes.labelcolor": '#808097',
-                  'scatter.edgecolors': '#000000',
-                  'axes.edgecolor': '#000000'}
+    s, style_dict = set_style()
 
     candles['zigzag'] = np.nan
     last_point = candles.iloc[0]['open']
@@ -158,9 +130,6 @@ def zigzag(candles: pandas.DataFrame) -> pandas.DataFrame:
     for i in range(len(candles.index)):
         if str(candles.iat[i, 14]) != str(np.nan):
             line_list.append((candles.iat[i, 0], candles.iat[i, 14]))
-
-    s = mplf.make_mpf_style(marketcolors=mc, figcolor='#1C1C23', facecolor='#1C1C23', edgecolor='#808097',
-                            rc=style_dist, gridcolor='#3A3A48', gridstyle="--")
 
     candles.index = pandas.DatetimeIndex(candles['time'])
     try:
